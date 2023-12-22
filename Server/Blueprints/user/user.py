@@ -102,7 +102,7 @@ def create_order():
     elif request.method == "POST":
             address = ""
             type_order = TypeOrder.in_hall
-            if int(form.type_order.data) == TypeOrder.in_hall.value[0]:
+            if int(form.type_order.data) == TypeOrder.in_hall.value:
                 address = service.get_address_by_bakery_uuid(form.bakeries.data)
                 print("Тип заказа: в зале")
             else:
