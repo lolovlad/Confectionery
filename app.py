@@ -50,7 +50,7 @@ route = {
 
 menu = [
     {"url": "index", "title": "главная"},
-    {"url": "shop", "title": "магазин"},
+    {"url": "shop", "title": "товары"},
 ]
 
 
