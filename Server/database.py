@@ -165,3 +165,47 @@ class Bakery(db.Model):
     name = Column(String(32), nullable=False)
     address = Column(String, nullable=False)
     description = Column(Text, nullable=True)
+
+    def __repr__(self):
+        return f"{self.name} ({self.address})"
+
+
+class Table(db.Model):
+    __tablename__ = "table"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(32), nullable=False)
+    description = Column(Text, nullable=True)
+    bakery_id = Column(Integer, ForeignKey('bakery.id'), nullable=True)
+    bakery = relationship("Bakery")
+
+    def __repr__(self):
+        return f"{self.name}"
+
+
+class RegistrateTable(db.Model):
+    __tablename__ = "registrate_table"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    trace_id = Column(String, unique=True, default=str(uuid4()))
+
+    name = Column(String(32), nullable=False)
+    surname = Column(String(32), nullable=False)
+    patronymics = Column(String(32), nullable=False)
+
+    phone = Column(String(20), nullable=False)
+    table_id = Column(Integer, ForeignKey('table.id'), nullable=True, default=None)
+    table = relationship("Table")
+
+    bakery_id = Column(Integer, ForeignKey('bakery.id'), nullable=True)
+    bakery = relationship("Bakery")
+
+    data_registrate = Column(DateTime, nullable=True)
+
+    order_id = Column(Integer, ForeignKey('order.id'), nullable=True, default=None)
+    order = relationship("Order")
+    status_registrate = Column(Enum(StatusOrder), default=StatusOrder.waiting_for_confirmation)
+
+    start_time = Column(Integer, nullable=True, default=0)
+    end_time = Column(Integer, nullable=True, default=0)
+
+
+

@@ -4,7 +4,7 @@ from pydantic import BaseModel
 class Type(BaseModel):
     id: int
     name: str
-    description: str
+    description: str | None
 
 
 class Ingredient(BaseModel):

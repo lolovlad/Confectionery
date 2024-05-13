@@ -45,7 +45,7 @@
                   <button class="nav-link active" id="in_hall-tab" data-bs-toggle="tab" data-bs-target="#in_hall" type="button" role="tab" aria-controls="home" aria-selected="true">В зале</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                  <button class="nav-link" id="delivery-tab" data-bs-toggle="tab" data-bs-target="#delivery" type="button" role="tab" aria-controls="profile" aria-selected="false">Доставка</button>
+                  <button class="nav-link" id="delivery-tab" data-bs-toggle="tab" data-bs-target="#delivery" type="button" role="tab" aria-controls="profile" aria-selected="false">Бронирование</button>
                 </li>
             </ul>
             <div class="tab-content tab_marg" id="myTabContent">
@@ -54,25 +54,13 @@
                     {{ form.bakeries(class_="form-select form-select-lg mb-3") }}
                 </div>
                 <div class="tab-pane fade" id="delivery" role="tabpanel" aria-labelledby="delivery-tab">
-                    <div class="mb-3">
-                        <div class="input-group">
-                            <span class="input-group-text">Город</span>
-                            {{ form.city(class_="form-control") }}
-                        </div>
+                    <div class="row">
+                        {{ form.bakeries.label(class_="form-label") }}
+                        {{ form.bakeries(class_="form-select form-select-lg mb-3") }}
                     </div>
-                    <div class="mb-3">
-                        <div class="input-group">
-                            <span class="input-group-text">Улица, дом</span>
-                            {{ form.street(class_="form-control") }}
-                            {{ form.home(class_="form-control") }}
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <div class="input-group">
-                            <span class="input-group-text">Квартира, этаж</span>
-                            {{ form.apartment(class_="form-control") }}
-                            {{ form.floor(class_="form-control") }}
-                        </div>
+                    <div class="row">
+                        {{ form.date_reg.label(class_="form-label") }}
+                        {{ form.date_reg(class_="form-control", size=32) }}
                     </div>
                 </div>
             </div>

@@ -2,7 +2,7 @@
 
 {% block content %}
 
-<form action="/registration" method="POST", class="form__sigup">
+<form action="/registration" method="POST" class="form__sigup">
     {% for field, errors in form.errors.items() %}
         <div class="alert alert-danger" role="alert">
             {{ form[field].label }}: {{ ', '.join(errors) }}

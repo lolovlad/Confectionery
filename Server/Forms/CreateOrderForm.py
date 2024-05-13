@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, IntegerField, SubmitField, SelectField, HiddenField
+from wtforms import StringField, TextAreaField, IntegerField, SubmitField, SelectField, HiddenField, DateField
 from wtforms.validators import DataRequired, Length
 
 
@@ -10,6 +10,7 @@ class CreateOrderForm(FlaskForm):
     home = IntegerField("Дом", validators=[])
     apartment = IntegerField("Квартира", validators=[])
     floor = IntegerField("Этаж", validators=[])
+    date_reg = DateField("Дата бронирования")
     type_order = HiddenField()
     description = TextAreaField("Комментарии к заказу")
     type_payment = SelectField("Тип оплаты", choices=[("1", "оплата при получении")])

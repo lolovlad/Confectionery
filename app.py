@@ -5,22 +5,25 @@ from flask_uuid import FlaskUUID
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 
-from Server.database import db, Role, User, SweetProduct, Ingredient, Bakery, Type
+from Server.database import db, Role, User, SweetProduct, Ingredient, Bakery, Type, Table, RegistrateTable
 from Server.Models import UserSession
 
 from Server.Repository import UserRepository
 from Server.Models import GetUser
-from Server.Service import LoginService, UserService, ShopService
+from Server.Service import LoginService, UserService, ShopService, RegistrateTableService
 from Server.AdminView import *
-from Server.Forms import LoginForm, RegistrationForm, SearchSweetProduct
+from Server.Forms import LoginForm, RegistrationForm, SearchSweetProduct, RegTableFrom
 
 from Server.Blueprints.user.user import user_router
 from Server.Blueprints.manager.manager import manager_router
 from Server.Blueprints.worker.worker import worker_router
 
+from settings import settings
+from datetime import datetime
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '2wae3tgv'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///main.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql+psycopg2://{settings.postgres_user}:{settings.postgres_password}@{settings.postgres_host}:{settings.postgres_port}/{settings.postgres_db}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config['UPLOAD_FOLDER'] = '/Files'
@@ -51,6 +54,7 @@ route = {
 menu = [
     {"url": "index", "title": "главная"},
     {"url": "shop", "title": "товары"},
+    {"url": "reg_table", "title": "Бронирование столика"}
 ]
 
 
@@ -98,6 +102,40 @@ def login():
             session["car"] = {}
             return redirect("/")
         return redirect("login")
+
+
+@app.route("/reg_table",  methods=["POST", "GET"])
+def reg_table():
+    form = RegTableFrom()
+    is_user = False
+    service_shop = ShopService()
+    bakery = service_shop.get_list_bakery()
+    form.bakeries.choices = [(g.trace_id, g.name) for g in bakery]
+    message = None
+    if current_user.is_authenticated:
+        is_user = True
+    if request.method == "GET":
+        message = None
+    if request.method == "POST":
+        service = RegistrateTableService()
+        entity = RegistrateTable()
+        if current_user.is_authenticated:
+            entity.name = current_user.user.name
+            entity.surname = current_user.user.surname
+            entity.patronymics = current_user.user.patronymics
+            entity.phone = current_user.user.phone
+        else:
+            entity.name = form.name.data
+            entity.surname = form.surname.data
+            entity.patronymics = form.patronymics.data
+            entity.phone = form.phone.data
+        bakery = service_shop.get_bakery_uuid(form.bakeries.data)
+        entity.bakery_id = bakery.id
+        entity.data_registrate = form.date_reg.data
+        service.add_registrate_table(entity)
+        message = "Спсибо за заявку менеджер скоро с вами свяжется"
+    return render_template("reg_table.html", title="Бронирование", form=form, menu=menu, user=current_user,
+                           is_user=is_user, message=message)
 
 
 @app.route("/registration", methods=["POST", "GET"])
@@ -223,6 +261,7 @@ admin.add_view(SweetProductAdminView(SweetProduct, db.session, name="Конди�
 admin.add_view(ModelView(Ingredient, db.session, name="Ингридиенты"))
 admin.add_view(ModelView(Type, db.session, name="Тип изделия"))
 admin.add_view(BakeryAdminView(Bakery, db.session, name="Пекарня"))
+admin.add_view(ModelView(Table, db.session, name="Места"))
 
 admin.add_link(LogoutMenuLink(name="Выход", category="", url="/logout"))
 

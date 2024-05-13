@@ -1,10 +1,10 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session
 from flask_login import current_user, login_required
 
-from Server.Service import ShopService
-from Server.Forms import CreateOrderForm
+from Server.Service import ShopService, RegistrateTableService
+from Server.Forms import CreateOrderForm, OrderSweetUpdateForm
 
-from Server.database import TypeOrder
+from Server.database import TypeOrder, RegistrateTable
 
 from Server.Models import state_order, type_order
 
@@ -83,6 +83,7 @@ def info_order(uuid: str):
 def create_order():
     form = CreateOrderForm()
     service = ShopService()
+    service_reg = RegistrateTableService()
     bakery = service.get_list_bakery()
     form.bakeries.choices = [(g.trace_id, g.name) for g in bakery]
     if request.method == "GET":
@@ -107,12 +108,46 @@ def create_order():
                 print("Тип заказа: в зале")
             else:
                 type_order = TypeOrder.with_myself
-                address = f"{form.city.data} {form.street.data} {form.home.data} {form.apartment.data} {form.floor.data}"
-                print("Тип заказа: Доставка")
+                address = service.get_address_by_bakery_uuid(form.bakeries.data)
+                print("Тип заказа: Бронирование")
             cart = session.get("car")
             order = service.create_order(type_order, address, form.description.data, cart, current_user.user.id)
             if order is not None:
                 session["car"] = {}
+                service_reg.add_registrate_table(RegistrateTable(
+                    name=current_user.user.name,
+                    surname=current_user.user.surname,
+                    patronymics=current_user.user.patronymics,
+                    phone=current_user.user.phone,
+                    bakery_id=service.get_bakery_uuid(form.bakeries.data).id,
+                    data_registrate=form.date_reg.data,
+                    order_id=order.id
+                ))
                 return redirect(url_for('user_blueprint.info_order',  uuid=order.trace_id))
             else:
                 return redirect(url_for("user_blueprint.create_order"))
+
+
+@user_router.route("/car/update/<uuid>", methods=["GET", "POST"])
+@login_required
+def update_car(uuid: str):
+    form = OrderSweetUpdateForm()
+    if request.method == "GET":
+        cart: dict = session.get("car")
+
+        form.count.data = cart[uuid]
+        return render_template("update_item_order.html",
+                               menu=menu,
+                               user=current_user,
+                               form=form,
+                               uuid_item=uuid)
+    elif request.method == "POST":
+        count = form.count.data
+        cart: dict = session.get("car")
+        if count <= 0:
+            return redirect(url_for("user_blueprint.delete_car", uuid=uuid))
+        else:
+            cart[uuid] = count
+        session["car"] = cart
+        print(url_for("user_blueprint.car"))
+        return redirect(url_for("user_blueprint.car"))

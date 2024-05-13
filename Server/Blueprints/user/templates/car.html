@@ -24,6 +24,7 @@
                         {{i.name}}
                         {% endfor %}</p>
                     <p>кол: {{prod.count}}</p>
+                    <a href="{{url_for('user_blueprint.update_car',  uuid=prod.sweet_product.trace_id)}}" class="btn btn-danger">Изменить</a>
                 </div>
                 <div class="col-3">
                     <p>общаяя цена: {{prod.count * prod.price}}</p>

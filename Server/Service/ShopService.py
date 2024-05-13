@@ -20,6 +20,9 @@ class ShopService:
     def get_address_by_bakery_uuid(self, uuid: str) -> str:
         return self.__bakery_repository.get_by_uuid(uuid).address
 
+    def get_bakery_uuid(self, uuid: str) -> Bakery:
+        return self.__bakery_repository.get_by_uuid(uuid)
+
     def get_list_tag(self) -> list[Type]:
         return self.__sweet_repository.get_list_tag()
 
@@ -35,6 +38,7 @@ class ShopService:
         sweet_products_entity = self.__sweet_repository.get_sweet_product()
         sweet_products = [GetSweetProduct.model_validate(i, from_attributes=True) for i in sweet_products_entity]
         for i in sweet_products:
+            print(i.image)
             name, ext = i.image.split(".")
             i.image = f"{name}_thumb.{ext}"
         return sweet_products
